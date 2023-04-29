@@ -12,6 +12,45 @@
 #include <fcntl.h>
 #include <errno.h>
 
+
+
+
+
+
+
+#include <errno.h>
+#include <dirent.h>
+#include <signal.h>
+#include <stdarg.h>
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<sys/types.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <dirent.h>
+#include <signal.h>
+#include <stdarg.h>
+#include <limits.h>
+#include <fcntl.h>
+#include <sys/wait.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+#define BUFSIZE 64
+#define DELIM " \t\r\n\a"
+#define RL_BUFSIZE 1024
+
+
 #define READ_BUF_SIZE 1024
 #define WRITE_BUF_SIZE 1024
 #define BUF_FLUSH -1
@@ -194,5 +233,32 @@ void check_chain(info_t *, char *, size_t *, size_t, size_t);
 int replace_alias(info_t *);
 int replace_vars(info_t *);
 int replace_string(char **, char *);
+
+int my_cd(char **args);
+int my_help(char **args);
+int my_exit(char **args);
+int my_builtins(void);
+void loop(char **envp);
+char **split_line(char *line);
+char *read_line(void);
+int execute(char **args, char **envp);
+int launch(char **args, char **envp);
+void while_loop(char *buffer, int position);
+
+void execmd(char **argv);
+char *_strcat(char *dest, char *src);
+int _putchar(char c);
+char *_strncat(char *dest, char *src, int n);
+char *_strchr(char *s, char c);
+int _strlen(char *s);
+char *_strncpy(char *dest, char *src, int n);
+void _puts(char *str);
+int _strcmp(char *s1, char *s2);
+unsigned int _strspn(char *s, char *accept);
+char *_strcpy(char *dest, char *src);
+int _atoi(char *s);
+void print(const char * const format, ...);
+void *_realloc(void *ptr, unsigned int old_size, unsigned int new_size);
+
 
 #endif
