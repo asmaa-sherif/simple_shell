@@ -1,116 +1,138 @@
 #include "sample.h"
-
 /**
- * _myhistory - displays the history list, one command by line, preceded
- *              with line numbers, starting at 0.
- * @info: Structure containing potential arguments. Used to maintain
- *        constant function prototype.
- *  Return: Always 0
- */
-int _myhistory(info_t *info)
-{
-	print_list(info->history);
-	return (0);
-}
-
-/**
- * unset_alias - sets alias to string
- * @info: parameter struct
- * @str: the string alias
+ * my_cd - change directory
+ * @args: parsed command
  *
- * Return: Always 0 on success, 1 on error
+ * Return: 0 or 1
  */
-int unset_alias(info_t *info, char *str)
+int my_cd(char **args)
 {
-	char *p, c;
-	int ret;
-
-	p = _strchr(str, '=');
-	if (!p)
-		return (1);
-	c = *p;
-	*p = 0;
-	ret = delete_node_at_index(&(info->alias),
-		get_node_index(info->alias, node_starts_with(info->alias, str, -1)));
-	*p = c;
-	return (ret);
+if (args[1] == NULL)
+{
+chdir(getenv("HOME"));
+}
+else
+{
+if (chdir(args[1]) != 0)
+{
+printf("%s\n", args[1]);
+perror("./shell: No such file or directory\n");
+}
+}
+return (1);
 }
 
 /**
- * set_alias - sets alias to string
- * @info: parameter struct
- * @str: the string alias
+ * my_exit - exit shell
+ * @argv: integer arg of exit
  *
- * Return: Always 0 on success, 1 on error
+ * Return: 1
  */
-int set_alias(info_t *info, char *str)
+int my_exit(char **argv)
 {
-	char *p;
-
-	p = _strchr(str, '=');
-	if (!p)
-		return (1);
-	if (!*++p)
-		return (unset_alias(info, str));
-
-	unset_alias(info, str);
-	return (add_node_end(&(info->alias), str, 0) == NULL);
-}
-
-/**
- * print_alias - prints an alias string
- * @node: the alias node
- *
- * Return: Always 0 on success, 1 on error
- */
-int print_alias(list_t *node)
-{
-	char *p = NULL, *a = NULL;
-
-	if (node)
+	if (!argv[1])
+		exit(EXIT_SUCCESS);
+	else
 	{
-		p = _strchr(node->str, '=');
-		for (a = node->str; a <= p; a++)
-		_putchar(*a);
-		_putchar('\'');
-		_puts(p + 1);
-		_puts("'\n");
-		return (0);
-	}
-	return (1);
-}
-
-/**
- * _myalias - mimics the alias builtin (man alias)
- * @info: Structure containing potential arguments. Used to maintain
- *          constant function prototype.
- *  Return: Always 0
- */
-int _myalias(info_t *info)
-{
-	int i = 0;
-	char *p = NULL;
-	list_t *node = NULL;
-
-	if (info->argc == 1)
-	{
-		node = info->alias;
-		while (node)
-		{
-			print_alias(node);
-			node = node->next;
-		}
-		return (0);
-	}
-	for (i = 1; info->argv[i]; i++)
-	{
-		p = _strchr(info->argv[i], '=');
-		if (p)
-			set_alias(info, info->argv[i]);
+		if (atoi(argv[1]))
+			setenv("$?", argv[1], 1);
 		else
-			print_alias(node_starts_with(info->alias, info->argv[i], '='));
+			setenv("$?", "2", 1);
+		exit(EXIT_FAILURE);
 	}
-
-	return (0);
+return (1);
 }
+/**
+ * loop - loop func
+ * @envp: environment of shell
+ *
+ * Return: void
+ */
+void loop(char **envp)
+{
+char *line;
+char **args;
+int status;
 
+do {
+line = read_line();
+args = split_line(line);
+status = execute(args, envp);
+free(line);
+free(args);
+} while (status);
+}
+/**
+ * split_line - read command
+ * @line: input
+ *
+ * Return: 1 or launch funnc output
+ */
+char **split_line(char *line)
+{
+int bufsize = BUFSIZE, position = 0;
+char *token, **tokens_backup;
+char **tokens = malloc(bufsize * sizeof(char *));
+
+if (!tokens)
+{
+fprintf(stderr, "allocation error\n");
+exit(EXIT_FAILURE);
+}
+token = strtok(line, DELIM);
+while (token != NULL)
+{
+tokens[position] = token;
+position++;
+if (position >= bufsize)
+{
+bufsize += BUFSIZE;
+tokens_backup = tokens;
+tokens = realloc(tokens, bufsize *sizeof(char *));
+if (!tokens)
+{
+free(tokens_backup);
+fprintf(stderr, "allocation error\n");
+exit(EXIT_FAILURE);
+}
+}
+token = strtok(NULL, DELIM);
+}
+tokens[position] = NULL;
+return (tokens);
+}
+/**
+ * launch - launch shell
+ * @args: input of shell
+ * @envp: environment of shell
+ *
+ * Return: 1
+ */
+int launch(char **args, char **envp)
+{
+pid_t pid;
+int status;
+char * const *env = envp;
+
+pid = fork();
+if (pid == 0)
+{
+execve(args[0], args, env);
+if (execvp(args[0], args) == -1)
+{
+perror("Error in Launching.");
+}
+exit(EXIT_FAILURE);
+}
+else if (pid < 0)
+{
+perror("komal");
+}
+else
+{
+do {
+waitpid(pid, &status, WUNTRACED);
+} while (!WIFEXITED(status) && !WIFSIGNALED(status));
+}
+return (1);
+}
