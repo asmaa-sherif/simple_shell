@@ -124,10 +124,10 @@ void *_realloc(void *, unsigned int, unsigned int);
 int bfree(void **);
 
 /* betty.c File */
-int interactive(info_t *);
-int is_delim(char, char *);
-int _isalpha(int);
-int _atoi(char *);
+int interactives(info_t *);
+int delim(char, char *);
+int alpha(int);
+int atoi(char *);
 
 /* shell_error_handlers_2.c File */
 int _erratoi(char *);
